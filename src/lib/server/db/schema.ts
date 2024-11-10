@@ -1,4 +1,5 @@
-import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { generateChatID } from '../chat';
 
 export const user = pgTable('user', {
     id: text('id').primaryKey(),
@@ -12,6 +13,14 @@ export const session = pgTable("session", {
     userId: text('user_id').notNull().references(() => user.id),
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull()
 });
+
+export const chatTable = pgTable("chat", {
+    id: text('id').primaryKey().notNull(),
+    prompt: text('prompt').array().notNull(),
+    answer: text('answer').array().notNull(),
+    fileUri: text('file_Uri').notNull(),
+    initializedAnswer: text('initialized_answer'),
+})
 
 export type Session = typeof session.$inferSelect;
 
