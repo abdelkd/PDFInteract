@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import fs from 'node:fs/promises'
 
 import { generateChatID, fileManager, askPDF } from "$lib/server/chat";
 import type { Actions } from "./$types";
@@ -13,10 +13,11 @@ export const actions = {
     const fileBuffer = await file?.arrayBuffer();
     if (!fileBuffer || !prompt) return
 
+    await fs.access('uploads').catch(async () => fs.mkdir('uploads'))
+
     // TODO: remove just for testing
     const filename = "./uploads/" + file?.name + Date.now()
-    await writeFile(filename, Buffer.from(fileBuffer), "utf-8")
-    console.log('file made')
+    await fs.writeFile(filename, Buffer.from(fileBuffer), "utf-8")
 
     const fileResult = await fileManager.uploadFile(filename, {
       mimeType: "application/pdf",
