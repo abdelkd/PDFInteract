@@ -15,7 +15,8 @@
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run",
 		"format": "prettier --write .",
-		"lint": "prettier --check ."
+		"lint": "prettier --check .",
+		"prepare": "pnpm db:push"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
