@@ -1,6 +1,4 @@
-import fs from 'node:fs/promises'
-
-import { generateChatID, fileManager, askPDF } from "$lib/server/chat";
+import { generateChatID, fileManager } from "$lib/server/chat";
 import type { Actions } from "./$types";
 import { chatTable } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
@@ -13,16 +11,15 @@ export const actions = {
     const fileBuffer = await file?.arrayBuffer();
     if (!fileBuffer || !prompt) return
 
-    await fs.access('uploads').catch(async () => fs.mkdir('uploads'))
-
     // TODO: remove just for testing
-    const filename = "./uploads/" + file?.name + Date.now()
-    await fs.writeFile(filename, Buffer.from(fileBuffer), "utf-8")
+    const filename = "./uploads/" + Date.now() + file?.name
 
-    const fileResult = await fileManager.uploadFile(filename, {
-      mimeType: "application/pdf",
+    const fileResult = await fileManager.uploadFile(Buffer.from(fileBuffer), {
       displayName: filename.split("/")[2],
+      mimeType: "application/pdf",
     })
+
+    console.log({ fileResult })
 
     const chatID = generateChatID()
     await db.insert(chatTable)
