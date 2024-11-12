@@ -14,8 +14,6 @@
     filename = undefined
     resetFileInput()
   }
-
-  $inspect(filename)
 </script>
 
 <div class="my-3">
