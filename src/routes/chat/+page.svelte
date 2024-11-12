@@ -4,10 +4,17 @@
 	import UploadFileIndicator from "$lib/components/UploadFileIndicator.svelte";
   import type { ActionData } from './$types'
 
-  let { form }: { form: ActionData } = $props()
+  interface Props { 
+    form: ActionData,
+  }
+
+  let { form }: Props = $props()
 
   let files: FileList | undefined = $state(undefined);
   let fileInput: HTMLInputElement;
+
+  let isLoading = $state(false);
+  let errorMessage = $state("Something went wrong, try again.")
 </script>
 
 <div class="mx-auto w-fit pt-20">
@@ -18,8 +25,17 @@
     class="flex flex-col items-start" 
     action="?/startChat" 
     use:enhance={() => {
+      isLoading = true;
+      errorMessage = "";
+
       return async ({ result, update }) => {
         await applyAction(result)
+
+        if (form?.error) {
+          console.log({form})
+          isLoading = false;
+          errorMessage = "Something went wrong, try again";
+        }
 
         if (form?.chatID) {
           goto("/chat/" + form.chatID)
@@ -37,7 +53,12 @@
       accept=".pdf"/>
 
     <UploadFileIndicator bind:files={files} resetFileInput={() => fileInput.value = ""} />
+    {#if errorMessage}
+      <p>{errorMessage}</p>
+    {/if}
 
-    <button type="submit">submit</button>
+    <button class={`px-4 w-24 py-1.5 text-slate-50 rounded-lg ${isLoading ? "bg-gray-700" : "bg-gray-950"}`} type="submit">
+      {isLoading ? "..." : "submit"}
+    </button>
   </form>
 </div>
