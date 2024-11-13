@@ -14,6 +14,7 @@
 	let chatHistory = $state<ReturnType<typeof getChatHistoryState>>(getChatHistoryState())
 
 	let newQuestion = $state('');
+	let shadowNewQuestion = $state('');
 	let chats = chatsFromServer;
 	let lastChat = $state(chatsFromServer.at(-1)!);
 
@@ -50,6 +51,8 @@
 		const endpoint = `/chat/${$page.params.chatID}`;
 		let textBuf = '';
 
+		shadowNewQuestion = newQuestion;
+		newQuestion = '';
 		chatHistory.addThread({
 			user: newQuestion,
 			ai: '',
@@ -83,7 +86,10 @@
 
 		} catch (err) {
 			console.log(err);
+			newQuestion = shadowNewQuestion
 		}
+
+		shadowNewQuestion = '';
 	};
 </script>
 
