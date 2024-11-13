@@ -1,6 +1,7 @@
 import { getChatByID } from "$lib/server/db/chat";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
+import { chatHistoryFromChat } from "$lib/server/chat";
 
 const prom = async () => new Promise((res) => setTimeout(res, 3000))
 
@@ -10,19 +11,9 @@ export const load: LayoutServerLoad = async ({ params }) => {
 
   const chat = chats[0];
 
-  if (chat.prompt.length > 1) {
-    throw new Error('more than one prompt, UNIMPLEMENTED');
-  }
-
-  const groupedChats = chat.prompt.map((prompt, idx) => {
-    return {
-      prompt,
-      answer: chat.answer[idx] ?? null,
-    }
-  })
+  const chatHistory = chatHistoryFromChat(chat)
 
   return {
-    chats: groupedChats,
-    initialized: chat.answer.length > 0
+    chatHistory,
   }
 }

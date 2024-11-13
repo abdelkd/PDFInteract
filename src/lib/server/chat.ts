@@ -2,6 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import { env } from "$env/dynamic/private";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
+import type { getChatByID } from "./db/chat";
+import type { Thread } from "$lib/types";
 
 const mimeType = "application/pdf"
 
@@ -59,9 +61,50 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
   }
 }
 
+export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri: string) => {
+  const SEPARATOR = '-------CONVERSATION--------'
+  const mix = mixedPrompts.map((prompt) => {
+    return `
+    USER:
+    ${prompt.user}
+
+    AI:
+    ${prompt.ai}
+    `
+  })
+
+  const initialPrompt = `
+    Given This conversation between AI and a User. 
+    Each Question and Answer is separated by ${SEPARATOR}.
+    ${mix.join(SEPARATOR)}
+  
+    Based On This History and The file provided, The question is: ${question}.
+    THE RULES THAT YOUR MUST FOLLOW:
+    - YOUR REPLY MUST NOT BE WRAPPED IN JSON OR ANYTHING.
+    - IT'S OKAY TO REPLY WITH LONG AND DESCRIPTIVE TEXT.
+  `
+
+  return model.generateContentStream([
+    initialPrompt,
+    {
+      fileData: {
+        fileUri,
+        mimeType: 'application/pdf',
+      }
+    }
+  ])
+}
+
 export function generateChatID() {
   const tokenBytes = crypto.getRandomValues(new Uint8Array(25))
   const timestamp = Date.now()
   const token = encodeBase32LowerCaseNoPadding(tokenBytes) + timestamp.toString()
   return token
+}
+
+export function chatHistoryFromChat(chat: Awaited<ReturnType<typeof getChatByID>>[number]): Thread[] {
+  return chat.prompt.map((prompt, idx) => ({
+    user: prompt,
+    ai: chat.answer[idx] ?? ''
+  }))
 }

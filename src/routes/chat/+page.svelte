@@ -29,7 +29,9 @@
 			errorMessage = '';
 
 			return async ({ result, update }) => {
+				console.log('applying')
 				await applyAction(result);
+				console.log('done')
 
 				if (form?.error) {
 					isLoading = false;

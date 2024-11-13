@@ -9,7 +9,7 @@ export const actions = {
     const file = formData.get("pdf-file") as File | null
     const prompt = formData.get("prompt")?.toString()
     const fileBuffer = await file?.arrayBuffer();
-    if (!fileBuffer || !prompt || !file?.name) return {error: true}
+    if (!fileBuffer || !prompt || !file?.name) return { error: true }
 
     // TODO: remove just for testing
     const filename = Date.now() + file.name
@@ -26,6 +26,7 @@ export const actions = {
     
     console.log({ fileResult })
     return {
+      error: false,
       chatID,
     }
   },
