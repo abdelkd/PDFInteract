@@ -28,6 +28,10 @@
 			const endpoint = `/chat/${chatID}?prompt-idx=${0}`;
 
 			fetch(endpoint).then(async (response) => {
+				if (!response.ok) {
+					return console.error('Something went wrong')
+				}
+
 				const reader = response.body?.getReader();
 				if (!reader) return;
 
@@ -54,7 +58,7 @@
 		shadowNewQuestion = newQuestion;
 		newQuestion = '';
 		chatHistory.addThread({
-			user: newQuestion,
+			user: shadowNewQuestion,
 			ai: '',
 		})
 
@@ -65,6 +69,10 @@
 					prompt: shadowNewQuestion,
 				}),
 			}).then(async (response) => {
+				if (!response.ok) {
+					throw new Error('')
+				}
+
 				const reader = response.body?.getReader();
 				if (!reader) return;
 
@@ -87,6 +95,7 @@
 		} catch (err) {
 			console.log(err);
 			newQuestion = shadowNewQuestion
+			chatHistory.popThread();
 		}
 
 		shadowNewQuestion = '';

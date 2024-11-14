@@ -7,11 +7,12 @@ const prom = async () => new Promise((res) => setTimeout(res, 3000))
 
 export const load: LayoutServerLoad = async ({ params }) => {
   const chats = await getChatByID(params.chatID)
-  if (chats.length === 0) return error(404)
+  if (chats.length === 0) return error(404);
 
   const chat = chats[0];
+  if (Date.now() >= (new Date(chat.expiresOn)).getTime()) return error(404);
 
-  const chatHistory = chatHistoryFromChat(chat)
+  const chatHistory = chatHistoryFromChat(chat);
 
   return {
     chatHistory,
