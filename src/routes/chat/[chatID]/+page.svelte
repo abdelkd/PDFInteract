@@ -62,7 +62,7 @@
 			await fetch(endpoint, {
 				method: 'POST',
 				body: JSON.stringify({
-					prompt: newQuestion
+					prompt: shadowNewQuestion,
 				}),
 			}).then(async (response) => {
 				const reader = response.body?.getReader();
