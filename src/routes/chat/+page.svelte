@@ -29,9 +29,7 @@
 			errorMessage = '';
 
 			return async ({ result, update }) => {
-				console.log('applying')
 				await applyAction(result);
-				console.log('done')
 
 				if (form?.error) {
 					isLoading = false;
@@ -45,7 +43,6 @@
 		}}
 	>
 		<textarea
-			value="what's the name of the person in this resume?"
 			id="prompt"
 			name="prompt"
 			class="block border border-gray-200 my-5 w-full h-20 resize-none px-1"
