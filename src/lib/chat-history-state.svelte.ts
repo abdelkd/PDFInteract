@@ -13,12 +13,11 @@ class ChatHistory {
     this.chatHistory.push(thread);
   }
 
-  update(threads: Thread[]) {
-    this.chatHistory = threads;
+  popThread() {
+    this.chatHistory.pop()
   }
 
   updateLastThread(aiText: string) {
-    const oldThreads = this.chatHistory.slice(0, this.chatHistory.length - 1);
     const lastThread = this.chatHistory.at(-1);
     if (lastThread) {
       lastThread.ai = aiText
