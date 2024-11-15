@@ -13,6 +13,14 @@ export const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
 })
 
+const AI_RULES = `
+MAKE SURE TO ALWAYS FOLLOW THE RULES:
+THE RULES THAT YOUR MUST FOLLOW:
+- YOU SHOULD REPLY WITH THE LANGUAGE OF THE QUESTION.
+- YOUR REPLY MUST NOT BE WRAPPED IN JSON OR ANYTHING.
+- IT'S OKAY TO REPLY WITH LONG AND DESCRIPTIVE TEXT.
+`
+
 
 export const askPDF = async (pdfUri: string, prompt: string) => {
 
@@ -47,7 +55,8 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
         fileUri: pdfUri,
         mimeType: 'application/pdf',
       }
-    }
+    },
+    AI_RULES,
   ])
 
 
@@ -79,9 +88,6 @@ export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri
     ${mix.join(SEPARATOR)}
   
     Based On This History and The file provided, The question is: ${question}.
-    THE RULES THAT YOUR MUST FOLLOW:
-    - YOUR REPLY MUST NOT BE WRAPPED IN JSON OR ANYTHING.
-    - IT'S OKAY TO REPLY WITH LONG AND DESCRIPTIVE TEXT.
   `
 
   return model.generateContentStream([
@@ -91,7 +97,8 @@ export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri
         fileUri,
         mimeType: 'application/pdf',
       }
-    }
+    },
+    AI_RULES,
   ])
 }
 
