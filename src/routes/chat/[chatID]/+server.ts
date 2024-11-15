@@ -66,9 +66,6 @@ export const POST: RequestHandler = async ({ request, params }) => {
     ai: chat[0].answer[idx] ?? 'No Answer Provided.'
   }))
 
-  
-  
-  console.log({chatHistory})
   const stream = new ReadableStream({
     start: async (controller) => {
       
@@ -77,6 +74,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         const { done, value } = await answerStream.stream.next()
 
         if (done) {
+          await saveChatAnswer(chatID, (await answerStream.response).text());
           controller.close();
           break;
         }
