@@ -11,7 +11,7 @@
 
 	let { chatHistory: chatsFromServer } = data;
 
-	let chatHistory = $state<ReturnType<typeof getChatHistoryState>>(getChatHistoryState())
+	let chatHistory = $state<ReturnType<typeof getChatHistoryState>>(getChatHistoryState());
 
 	let newQuestion = $state('');
 	let shadowNewQuestion = $state('');
@@ -20,33 +20,45 @@
 
 	const decoder = new TextDecoder();
 
+	const fetchFirstThread = async (chatID: string) => {
+		const endpoint = `/chat/${chatID}?prompt-idx=${0}`;
+
+		const response = await fetch(endpoint);
+		if (!response.ok) {
+		  console.error('Something went wrong');
+			return false;
+		}
+
+		const reader = response.body?.getReader();
+		if (!reader) return;
+
+		let textBuf = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) return true;
+
+			if (lastChat.ai) lastChat.ai = '';
+
+			textBuf += decoder.decode(value);
+			chatHistory.updateLastThread(textBuf);
+		}
+	};
+
 	$effect(() => {
-
 		if (lastChat?.ai?.length === 0) {
-
 			const chatID = $page.params.chatID;
-			const endpoint = `/chat/${chatID}?prompt-idx=${0}`;
 
-			fetch(endpoint).then(async (response) => {
-				if (!response.ok) {
-					return console.error('Something went wrong')
+			(async() => {
+				for (let i=0; i < 4; i++) {
+	
+					const result = await fetchFirstThread(chatID)
+					if (result) return;
 				}
 
-				const reader = response.body?.getReader();
-				if (!reader) return;
-
-				let textBuf = '';
-
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) return;
-
-					if (lastChat.ai) lastChat.ai = '';
-
-					textBuf += decoder.decode(value);
-					chatHistory.updateLastThread(textBuf);
-				}
-			});
+				console.log('failed')
+				chatHistory.updateLastThread('Failed to generate content, try again later.')
+			})()
 		}
 	});
 
@@ -59,23 +71,22 @@
 		newQuestion = '';
 		chatHistory.addThread({
 			user: shadowNewQuestion,
-			ai: '',
-		})
+			ai: ''
+		});
 
 		try {
 			await fetch(endpoint, {
 				method: 'POST',
 				body: JSON.stringify({
-					prompt: shadowNewQuestion,
-				}),
+					prompt: shadowNewQuestion
+				})
 			}).then(async (response) => {
 				if (!response.ok) {
-					throw new Error('')
+					throw new Error('');
 				}
 
 				const reader = response.body?.getReader();
 				if (!reader) return;
-
 
 				while (true) {
 					const { done, value } = await reader.read();
@@ -91,10 +102,9 @@
 
 				console.log(textBuf);
 			});
-
 		} catch (err) {
 			console.log(err);
-			newQuestion = shadowNewQuestion
+			newQuestion = shadowNewQuestion;
 			chatHistory.popThread();
 		}
 
@@ -109,11 +119,11 @@
 {:else}
 	<div class="w-fit max-w-lg mx-auto py-6">
 		<div class="flex flex-col gap-3">
-			{#each chatHistory.chatHistory as chatThread} 
-			  <div class="max-w-lg border border-slate-200 rounded-md px-2 py-1">
-			  	<h1 class="text-3xl mb-3">{chatThread?.user}</h1>
-			  	<p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
-			  </div>
+			{#each chatHistory.chatHistory as chatThread}
+				<div class="max-w-lg border border-slate-200 rounded-md px-2 py-1">
+					<h1 class="text-3xl mb-3">{chatThread?.user}</h1>
+					<p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
+				</div>
 			{/each}
 
 			<div class="mt-5">
