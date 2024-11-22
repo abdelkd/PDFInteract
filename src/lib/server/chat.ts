@@ -46,6 +46,7 @@ type GetAIResponseArgs = ({
 
 export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
   const { prompt, pdfUri, callback, onEnd } = args;
+
   const response = await model.generateContentStream([
     'As an LLM that answers questions from the provided PDF file,\
     Here is a question about the provided PDF file and you have to answer it.',
@@ -57,8 +58,7 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
       }
     },
     AI_RULES,
-  ])
-
+  ]);
 
   while (true) {
     const { done, value } = await response.stream.next()
@@ -71,21 +71,19 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
 }
 
 export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri: string) => {
-  const SEPARATOR = '-------CONVERSATION--------'
   const mix = mixedPrompts.map((prompt) => {
     return `
     USER:
     ${prompt.user}
 
-    AI:
+    MODEL:
     ${prompt.ai}
     `
   })
 
   const initialPrompt = `
-    Given This conversation between AI and a User. 
-    Each Question and Answer is separated by ${SEPARATOR}.
-    ${mix.join(SEPARATOR)}
+    Given This conversation between MODEL and a USER. 
+    ${mix.join()}
   
     Based On This History and The file provided, The question is: ${question}.
   `

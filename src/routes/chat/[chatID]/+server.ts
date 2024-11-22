@@ -3,8 +3,6 @@ import type { RequestHandler } from './$types';
 import { askNewQuestion, getStreamedAIResponse } from '$lib/server/chat';
 import { getChatByID, saveChatAnswer } from '$lib/server/db/chat';
 
-const decoder = new TextDecoder();
-
 export const GET: RequestHandler = async ({ request, params }) => {
 	const queryParams = new URL(request.url).searchParams;
 	const chatID = params.chatID;
