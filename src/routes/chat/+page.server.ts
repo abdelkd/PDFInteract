@@ -1,15 +1,18 @@
 import { generateChatID, fileManager } from '$lib/server/chat';
-import type { Actions, PageServerLoad } from './$types';
 import { chatTable } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
+import { fail } from '@sveltejs/kit';
+
+import type { Actions } from './$types';
 
 export const actions = {
 	startChat: async ({ request }) => {
+    console.log('startChat')
 		const formData = await request.formData();
-		const file = formData.get('pdf-file') as File | null;
+		const file = formData.get('file') as File | null;
 		const prompt = formData.get('prompt')?.toString();
 		const fileBuffer = await file?.arrayBuffer();
-		if (!fileBuffer || !prompt || !file?.name) return { error: true };
+		if (!fileBuffer || !prompt || !file?.name) return fail(400, { file, prompt, missing: true });
 
 		// TODO: remove just for testing
 		const filename = Date.now() + file.name;
@@ -31,15 +34,11 @@ export const actions = {
 
 			console.log({ fileResult });
 			return {
-				error: false,
 				chatID
 			};
 		} catch (err) {
 			console.error(err);
-      return {
-        error: true,
-        message: 'Something went wrong.',
-      }
+      return fail(400, { message: "something went wrong" })
 		}
 	}
 } satisfies Actions;

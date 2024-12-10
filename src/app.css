@@ -1,3 +1,20 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
-@import "tailwindcss/utilities"
+@import "tailwindcss/utilities";
+
+@layer base {
+  :root {
+    --foreground: hsl(0, 0%, 0%);
+    --background: hsl(255, 100%, 100%);
+  
+    --primary: hsl(209, 100%, 77%);
+    --primary-foreground: hsl(0, 0%, 96%);
+  
+    --card: hsl(0, 0%, 93%);
+    --card-foreground--placeholder: hsl(0, 0%, 50%);
+  }
+}
+
+body {
+  @apply bg-background text-foreground
+}
