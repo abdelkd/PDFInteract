@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
 	import type { LayoutServerData } from './$types';
+  import clsx from 'clsx'
 
 	interface Props {
 		data: LayoutServerData;
@@ -119,12 +120,18 @@
 {:else}
 	<div class="w-fit max-w-lg mx-auto py-6">
 		<div class="flex flex-col gap-3">
-			{#each chatHistory.chatHistory as chatThread}
-				<div class="max-w-lg border border-slate-200 rounded-md px-2 py-1">
-					<h1 class="text-3xl mb-3">{chatThread?.user}</h1>
-					<p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
-				</div>
-			{/each}
+      <div class="space-y-4">
+        {#each chatHistory.chatHistory as chatThread}
+          <div class={clsx("p-4 rounded-lg ml-blue-400 ml-auto")}>
+						<p>you</p>
+            <p class="text-3xl mb-3">{chatThread?.user}</p>
+					</div>
+					<div class={clsx("p-4 rounded-lg ml-blue-400 ml-auto")}>
+						<p>Assistant</p>
+            <p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
+					</div>
+        {/each}
+      </div>
 
 			<div class="mt-5">
 				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-3 max-w-md">

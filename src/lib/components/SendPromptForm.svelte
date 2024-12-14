@@ -13,7 +13,7 @@
 
 	let textareaInput = $state('');
 	let selectedFileName = $state<undefined | string>(undefined);
-  let isLoading = $state(false)
+  let isLoading = $state(true)
 
 	$effect(() => {
 		if (textareaInput === '') {
@@ -51,18 +51,11 @@
 	};
 </script>
 
-<form method="post" action="/chat?/startChat" enctype="multipart/form-data" class="mt-auto md:mt-2 w-full max-w-lg bg-card p-4 rounded-[2rem]" 
+<form method="post" action="/chat?/startChat" enctype="multipart/form-data" class="mt-auto md:mt-2 w-full max-w-lg p-4 rounded-[2rem] bg-card border" 
   use:enhance={({ formElement, formData, action, cancel, submitter }) => {
     isLoading = true;
-		// `formElement` is this `<form>` element
-		// `formData` is its `FormData` object that's about to be submitted
-		// `action` is the URL to which the form is posted
-		// calling `cancel()` will prevent the submission
-		// `submitter` is the `HTMLElement` that caused the form to be submitted
 
 		return async ({ result, update }) => {
-			// `result` is an `ActionResult` object
-			// `update` is a function which triggers the default logic that would be triggered if this callback wasn't set
       if (result.status === 200) {
         /* @ts-expect-error */
         const data = result.data
@@ -87,7 +80,7 @@
 		class={clsx('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
 	>
 		<input bind:this={inputFile} onchange={handleFileChange} type="file" name="file" hidden />
-		<button class="w-fit" onclick={() => inputFile?.click()}>
+		<button class="w-fit" onclick={() => inputFile?.click()} disabled={isLoading}>
 			<div
 				class={clsx(
 					'relative h-10 border bg-[#DFDDDD] rounded-full flex justify-center items-center min-w-10 w-fit px-2'
@@ -111,9 +104,9 @@
 			</div>
 		</button>
 
-		<button bind:this={sendMessageButton}>
+		<button bind:this={sendMessageButton} disabled={isLoading}>
 			<div
-				class="size-10 border bg-primary text-primary-foreground rounded-full flex justify-center items-center"
+				class={clsx("size-10 border bg-primary text-primary-foreground rounded-full flex justify-center items-center", {"bg-gray-300 text-gray-500": isLoading})}
 			>
 				<ArrowUp size={20} />
 			</div>
