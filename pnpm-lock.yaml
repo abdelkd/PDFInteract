@@ -28,9 +28,6 @@ importers:
       '@vercel/postgres':
         specifier: ^0.10.0
         version: 0.10.0
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -59,6 +56,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.47)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       drizzle-kit:
         specifier: ^0.22.0
         version: 0.22.8
@@ -74,9 +74,18 @@ importers:
       svelte-check:
         specifier: ^4.0.0
         version: 4.0.6(svelte@5.1.13)(typescript@5.6.3)
+      tailwind-merge:
+        specifier: ^2.5.5
+        version: 2.5.5
+      tailwind-variants:
+        specifier: ^0.3.0
+        version: 0.3.0(tailwindcss@3.4.14)
       tailwindcss:
         specifier: ^3.4.9
         version: 3.4.14
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.14)
       typescript:
         specifier: ^5.0.0
         version: 5.6.3
@@ -1596,6 +1605,20 @@ packages:
     resolution: {integrity: sha512-xVNk8yLsZNfkyqWzVg8+nfU9ewiSjVW0S4qyTxfKa6Y7P5ZBhA+LDsh2cHWIXJQMltikQAk6W3sqGdQZSH58PA==}
     engines: {node: '>=18'}
 
+  tailwind-merge@2.5.5:
+    resolution: {integrity: sha512-0LXunzzAZzo0tEPxV3I297ffKZPlKDrjj7NXphC8V5ak9yHC5zRmxnOe2m/Rd/7ivsOMJe3JZ2JVocoDdQTRBA==}
+
+  tailwind-variants@0.3.0:
+    resolution: {integrity: sha512-ho2k5kn+LB1fT5XdNS3Clb96zieWxbStE9wNLK7D0AV64kdZMaYzAKo0fWl6fXLPY99ffF9oBJnIj5escEl/8A==}
+    engines: {node: '>=16.x', pnpm: '>=7.x'}
+    peerDependencies:
+      tailwindcss: '*'
+
+  tailwindcss-animate@1.0.7:
+    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+
   tailwindcss@3.4.14:
     resolution: {integrity: sha512-IcSvOcTRcUtQQ7ILQL5quRDg7Xs93PdJEk1ZLbhhvJc7uj/OAhYOnruEiwnGgBvUtaUAJ8/mhSw1o8L2jCiENA==}
     engines: {node: '>=14.0.0'}
@@ -2974,6 +2997,17 @@ snapshots:
       locate-character: 3.0.0
       magic-string: 0.30.12
       zimmerframe: 1.1.2
+
+  tailwind-merge@2.5.5: {}
+
+  tailwind-variants@0.3.0(tailwindcss@3.4.14):
+    dependencies:
+      tailwind-merge: 2.5.5
+      tailwindcss: 3.4.14
+
+  tailwindcss-animate@1.0.7(tailwindcss@3.4.14):
+    dependencies:
+      tailwindcss: 3.4.14
 
   tailwindcss@3.4.14:
     dependencies:
