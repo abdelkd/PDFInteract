@@ -122,12 +122,10 @@
 		<div class="flex flex-col gap-3">
       <div class="space-y-4">
         {#each chatHistory.chatHistory as chatThread}
-          <div class={clsx("p-4 rounded-lg ml-blue-400 ml-auto")}>
-						<p>you</p>
-            <p class="text-3xl mb-3">{chatThread?.user}</p>
+          <div class={clsx("p-4 rounded-lg bg-blue-200 ml-auto w-fit")}>
+            <p>{chatThread?.user}</p>
 					</div>
-					<div class={clsx("p-4 rounded-lg ml-blue-400 ml-auto")}>
-						<p>Assistant</p>
+					<div class={clsx("p-4 rounded-lg bg-gray-200 ml-auto")}>
             <p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
 					</div>
         {/each}
