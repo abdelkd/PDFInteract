@@ -13,7 +13,7 @@
 
 	let textareaInput = $state('');
 	let selectedFileName = $state<undefined | string>(undefined);
-  let isLoading = $state(true)
+  let isLoading = $state(false)
 
 	$effect(() => {
 		if (textareaInput === '') {
@@ -80,8 +80,8 @@
 		class={clsx('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
 	>
 		<input bind:this={inputFile} onchange={handleFileChange} type="file" name="file" hidden />
-		<button class="w-fit" onclick={() => inputFile?.click()} disabled={isLoading}>
-			<div
+		<button class="w-fit relative z-10" onclick={() => inputFile?.click()} disabled={isLoading}>
+			<span
 				class={clsx(
 					'relative h-10 border bg-[#DFDDDD] rounded-full flex justify-center items-center min-w-10 w-fit px-2'
 				)}
@@ -101,7 +101,7 @@
 						<X size={14} />
 					</a>
 				{/if}
-			</div>
+			</span>
 		</button>
 
 		<button bind:this={sendMessageButton} disabled={isLoading}>
