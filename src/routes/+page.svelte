@@ -2,7 +2,7 @@
 	import SendPromptForm from '$lib/components/SendPromptForm.svelte';
 </script>
 
-<div class="w-full h-full overflow-x-hidden pb-2 flex flex-col md:items-center">
+<div class="w-full h-dvh overflow-x-hidden pb-2 flex flex-col md:items-center">
 	<div
 		class="mx-auto pt-28 w-full px-6 md:w-5/12 md:min-w-[600px] h-full flex flex-col items-center"
 	>
