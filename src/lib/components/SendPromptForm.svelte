@@ -68,6 +68,21 @@
       isLoading = false;
 		};
 	}}>
+  {#if selectedFileName}
+    <div class="px-1.5 py-1 rounded-md flex items-center border bg-slate-50/80 max-w-[16rem] space-x-2 mb-2 relative">
+      <button onclick={clearFiles} class="size-4 flex justify-center items-center bg-white text-xs rounded-full border absolute -right-1 -top-1">
+        <X size={14} />
+      </button>
+
+      <div class="rounded-md size-10 bg-red-400"></div>
+      <div class="height-[3rem]">
+        <p class="text-lg font-semibold whitespace-nowrap overflow-ellipsis overflow-hidden max-w-[10rem]">{selectedFileName}</p>
+        <p class="text-muted-foreground">PDF</p>
+      </div>
+    </div>
+
+      
+  {/if}
 	<textarea
 		bind:this={textarea}
 		bind:value={textareaInput}
@@ -83,24 +98,10 @@
 		<button class="w-fit relative z-10" onclick={() => inputFile?.click()} disabled={isLoading}>
 			<span
 				class={clsx(
-					'relative h-10 border bg-[#DFDDDD] rounded-full flex justify-center items-center min-w-10 w-fit px-2'
+					'relative h-10 border rounded-full flex justify-center items-center min-w-10 w-fit hover:bg-slate-50 transition-colors duration-300'
 				)}
 			>
 				<Paperclip size={20} />
-				{#if selectedFileName}
-					<p class="pl-3 cursor-pointer">{selectedFileName}</p>
-
-					<a
-            href="/"
-						aria-label="remove file"
-						role="button"
-						tabindex="0"
-						onclick={clearFiles}
-						class="ml-2 absolute -right-6 size-4 bg-red-500 flex justify-center items-center text-background rounded-full"
-					>
-						<X size={14} />
-					</a>
-				{/if}
 			</span>
 		</button>
 
