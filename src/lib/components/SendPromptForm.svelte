@@ -98,7 +98,7 @@
 		<button class="w-fit relative z-10" onclick={() => inputFile?.click()} disabled={isLoading}>
 			<span
 				class={clsx(
-					'relative h-10 border rounded-full flex justify-center items-center min-w-10 w-fit hover:bg-slate-50 transition-colors duration-300'
+					'relative h-10 border rounded-full flex justify-center items-center min-w-10 w-fit hover:bg-slate-50 transition-colors duration-300 disabled:bg-slate-100'
 				)}
 			>
 				<Paperclip size={20} />
