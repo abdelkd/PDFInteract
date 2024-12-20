@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import { env } from "$env/dynamic/private";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import type { getChatByID } from "./db/chat";
+import { saveChatAnswer, type getChatByID } from "./db/chat";
 import type { Thread } from "$lib/types";
 
 const mimeType = "application/pdf"
@@ -41,7 +41,7 @@ type GetAIResponseArgs = ({
   prompt: string,
   pdfUri: string,
   callback: (data: string) => void;
-  onEnd: (response: string) => void;
+  onEnd: (response: string) => Promise<void>;
 })
 
 export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
@@ -60,12 +60,19 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
     AI_RULES,
   ]);
 
+  let textBuf = '';
+
   while (true) {
     const { done, value } = await response.stream.next()
-    if (done) return onEnd((await response.response).text());
+    if (done) {
+      await onEnd(textBuf);
+      return
+    }
 
     if (value) {
+      const currentText = value.text()
       callback(value.text())
+      textBuf += currentText
     }
   }
 }
@@ -108,8 +115,10 @@ export function generateChatID() {
 }
 
 export function chatHistoryFromChat(chat: Awaited<ReturnType<typeof getChatByID>>[number]): Thread[] {
-  return chat.prompt.map((prompt, idx) => ({
+  const chatHistory = chat.prompt.map((prompt, idx) => ({
     user: prompt,
     ai: chat.answer[idx] ?? ''
   }))
+
+  return chatHistory
 }

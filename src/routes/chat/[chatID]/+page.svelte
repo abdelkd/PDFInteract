@@ -93,7 +93,6 @@
 					const { done, value } = await reader.read();
 
 					if (done) {
-						console.log('done streaming');
 						break;
 					}
 
@@ -118,7 +117,7 @@
 		<h1 class="text-4xl">Nothing to show here</h1>
 	</div>
 {:else}
-	<div class="w-fit max-w-lg mx-auto py-6">
+	<div class="w-full max-w-lg mx-auto py-6">
 		<div class="flex flex-col gap-3">
       <div class="space-y-4">
         {#each chatHistory.chatHistory as chatThread}
@@ -131,10 +130,10 @@
         {/each}
       </div>
 
-			<div class="mt-5">
-				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-3 max-w-md">
-					<textarea bind:value={newQuestion} class="resize-none border border-gray-300"></textarea>
-					<button disabled={newQuestion === ''} class="bg-black text-white px-5 py-2">Send</button>
+			<div class="mt-5 w-full px-2">
+				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
+					<textarea bind:value={newQuestion} class="resize-none w-full border rounded-md"></textarea>
+					<button disabled={newQuestion === ''} class="bg-black rounded-lg text-white px-4 py-3">Send</button>
 				</form>
 			</div>
 		</div>

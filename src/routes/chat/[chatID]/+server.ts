@@ -31,10 +31,11 @@ export const GET: RequestHandler = async ({ request, params }) => {
 						callback: (data) => {
 							controller.enqueue(data);
 						},
-						onEnd: (response) => {
+						onEnd: async (response) => {
 							if (response === '') return;
 
-							saveChatAnswer(chatID, response).then(() => controller.close());
+							await saveChatAnswer(chatID, prompt, response)
+              controller.close()
 						}
 					});
 				} catch (error) {
@@ -75,16 +76,20 @@ export const POST: RequestHandler = async ({ request, params }) => {
 		const stream = new ReadableStream({
 			start: async (controller) => {
 				const answerStream = await askNewQuestion(chatHistory, prompt, chat[0].fileUri);
+        let textBuf = '';
+
 				while (true) {
 					const { done, value } = await answerStream.stream.next();
 
 					if (done) {
-						await saveChatAnswer(chatID, (await answerStream.response).text());
+						await saveChatAnswer(chatID, prompt, textBuf);
 						controller.close();
 						break;
 					}
 
-					controller.enqueue(value.text());
+          const currentText = value.text();
+					controller.enqueue(currentText);
+          textBuf += currentText;
 				}
 			}
 		});
