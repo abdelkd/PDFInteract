@@ -51,7 +51,7 @@
 	};
 </script>
 
-<form method="post" action="/chat?/startChat" enctype="multipart/form-data" class="mt-auto md:mt-2 w-full max-w-lg p-4 rounded-[2rem] bg-card border" 
+<form method="post" action="/chat?/startChat" enctype="multipart/form-data" class="mt-auto md:mt-2 w-full max-w-lg p-3 rounded-[2rem] bg-card border" 
   use:enhance={({ formElement, formData, action, cancel, submitter }) => {
     isLoading = true;
 
