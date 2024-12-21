@@ -4,6 +4,7 @@
 	import type { LayoutServerData } from './$types';
   import { cn } from '$lib/utils';
   import { Textarea } from '$lib/components/ui/textarea';
+  import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		data: LayoutServerData;
@@ -100,7 +101,6 @@
 					chatHistory.updateLastThread(textBuf);
 				}
 
-				console.log(textBuf);
 			});
 		} catch (err) {
 			console.log(err);
@@ -133,7 +133,7 @@
 			<div class="mt-5 w-full px-2">
 				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
 					<Textarea bind:value={newQuestion} class="resize-none w-full border rounded-md" />
-					<button disabled={newQuestion === ''} class="bg-black rounded-lg text-white px-4 py-3">Send</button>
+					<Button type="submit" disabled={newQuestion === ''} class="py-8 rounded-lg ">Send</Button>
 				</form>
 			</div>
 		</div>
