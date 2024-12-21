@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
 	import type { LayoutServerData } from './$types';
+  import { cn } from '$lib/utils';
 
 	interface Props {
 		data: LayoutServerData;
@@ -92,7 +93,6 @@
 					const { done, value } = await reader.read();
 
 					if (done) {
-						console.log('done streaming');
 						break;
 					}
 
@@ -117,19 +117,23 @@
 		<h1 class="text-4xl">Nothing to show here</h1>
 	</div>
 {:else}
-	<div class="w-fit max-w-lg mx-auto py-6">
+	<div class="w-full max-w-lg mx-auto py-6">
 		<div class="flex flex-col gap-3">
-			{#each chatHistory.chatHistory as chatThread}
-				<div class="max-w-lg border border-slate-200 rounded-md px-2 py-1">
-					<h1 class="text-3xl mb-3">{chatThread?.user}</h1>
-					<p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
-				</div>
-			{/each}
+      <div class="space-y-4">
+        {#each chatHistory.chatHistory as chatThread}
+          <div class={cn("p-4 rounded-lg bg-blue-200 ml-auto w-fit")}>
+            <p>{chatThread?.user}</p>
+					</div>
+					<div class={cn("p-4 rounded-lg bg-gray-200 ml-auto")}>
+            <p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
+					</div>
+        {/each}
+      </div>
 
-			<div class="mt-5">
-				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-3 max-w-md">
-					<textarea bind:value={newQuestion} class="resize-none border border-gray-300"></textarea>
-					<button disabled={newQuestion === ''} class="bg-black text-white px-5 py-2">Send</button>
+			<div class="mt-5 w-full px-2">
+				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
+					<textarea bind:value={newQuestion} class="resize-none w-full border rounded-md"></textarea>
+					<button disabled={newQuestion === ''} class="bg-black rounded-lg text-white px-4 py-3">Send</button>
 				</form>
 			</div>
 		</div>

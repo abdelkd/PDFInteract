@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import { env } from "$env/dynamic/private";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import type { getChatByID } from "./db/chat";
+import { saveChatAnswer, type getChatByID } from "./db/chat";
 import type { Thread } from "$lib/types";
 
 const mimeType = "application/pdf"
@@ -41,11 +41,12 @@ type GetAIResponseArgs = ({
   prompt: string,
   pdfUri: string,
   callback: (data: string) => void;
-  onEnd: (response: string) => void;
+  onEnd: (response: string) => Promise<void>;
 })
 
 export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
   const { prompt, pdfUri, callback, onEnd } = args;
+
   const response = await model.generateContentStream([
     'As an LLM that answers questions from the provided PDF file,\
     Here is a question about the provided PDF file and you have to answer it.',
@@ -57,35 +58,39 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
       }
     },
     AI_RULES,
-  ])
+  ]);
 
+  let textBuf = '';
 
   while (true) {
     const { done, value } = await response.stream.next()
-    if (done) return onEnd((await response.response).text());
+    if (done) {
+      await onEnd(textBuf);
+      return
+    }
 
     if (value) {
+      const currentText = value.text()
       callback(value.text())
+      textBuf += currentText
     }
   }
 }
 
 export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri: string) => {
-  const SEPARATOR = '-------CONVERSATION--------'
   const mix = mixedPrompts.map((prompt) => {
     return `
     USER:
     ${prompt.user}
 
-    AI:
+    MODEL:
     ${prompt.ai}
     `
   })
 
   const initialPrompt = `
-    Given This conversation between AI and a User. 
-    Each Question and Answer is separated by ${SEPARATOR}.
-    ${mix.join(SEPARATOR)}
+    Given This conversation between MODEL and a USER. 
+    ${mix.join()}
   
     Based On This History and The file provided, The question is: ${question}.
   `
@@ -110,8 +115,10 @@ export function generateChatID() {
 }
 
 export function chatHistoryFromChat(chat: Awaited<ReturnType<typeof getChatByID>>[number]): Thread[] {
-  return chat.prompt.map((prompt, idx) => ({
+  const chatHistory = chat.prompt.map((prompt, idx) => ({
     user: prompt,
     ai: chat.answer[idx] ?? ''
   }))
+
+  return chatHistory
 }
