@@ -3,6 +3,7 @@
 	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
 	import type { LayoutServerData } from './$types';
   import { cn } from '$lib/utils';
+  import { Textarea } from '$lib/components/ui/textarea';
 
 	interface Props {
 		data: LayoutServerData;
@@ -52,13 +53,12 @@
 
 			(async() => {
 				for (let i=0; i < 4; i++) {
-	
+
 					const result = await fetchFirstThread(chatID)
 					if (result) return;
 				}
 
-				console.log('failed')
-				chatHistory.updateLastThread('Failed to generate content, try again later.')
+				chatHistory.updateLastThread('Failed to generate content.')
 			})()
 		}
 	});
@@ -132,7 +132,7 @@
 
 			<div class="mt-5 w-full px-2">
 				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
-					<textarea bind:value={newQuestion} class="resize-none w-full border rounded-md"></textarea>
+					<Textarea bind:value={newQuestion} class="resize-none w-full border rounded-md" />
 					<button disabled={newQuestion === ''} class="bg-black rounded-lg text-white px-4 py-3">Send</button>
 				</form>
 			</div>
