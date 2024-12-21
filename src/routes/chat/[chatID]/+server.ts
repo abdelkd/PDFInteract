@@ -34,7 +34,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
 						onEnd: async (response) => {
 							if (response === '') return;
 
-							await saveChatAnswer(chatID, prompt, response)
+							await saveChatAnswer(chatID, '', response)
               controller.close()
 						}
 					});

@@ -1,11 +1,13 @@
 <script lang="ts">
-	import clsx from 'clsx';
-  import { enhance } from '$app/forms';
-
 	import Paperclip from 'lucide-svelte/icons/paperclip';
 	import ArrowUp from 'lucide-svelte/icons/arrow-up';
 	import X from 'lucide-svelte/icons/x';
+
+  import { buttonVariants, Button } from '$lib/components/ui/button';
+
+  import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { cn } from '$lib/utils';
 
 	let textarea: HTMLTextAreaElement;
 	let inputFile: HTMLInputElement;
@@ -13,7 +15,8 @@
 
 	let textareaInput = $state('');
 	let selectedFileName = $state<undefined | string>(undefined);
-  let isLoading = $state(false)
+  let isLoading = $state(false);
+  let errorMessage = $state('');
 
 	$effect(() => {
 		if (textareaInput === '') {
@@ -35,6 +38,7 @@
 	});
 
 	const handleFileChange = (e: Event) => {
+    if (errorMessage) errorMessage = '';
 		if (!e.target) return;
 
 		const files = e.target?.files;
@@ -46,6 +50,7 @@
 
 	const clearFiles = (e: Event) => {
 		e.stopPropagation();
+    if (errorMessage) errorMessage = '';
 		selectedFileName = '';
 		inputFile.value = '';
 	};
@@ -54,6 +59,15 @@
 <form method="post" action="/chat?/startChat" enctype="multipart/form-data" class="mt-auto md:mt-2 w-full max-w-lg p-3 rounded-[2rem] bg-card border" 
   use:enhance={({ formElement, formData, action, cancel, submitter }) => {
     isLoading = true;
+    if (!selectedFileName || !textareaInput) {
+      errorMessage = 'Please upload PDF file and write your question.';
+      
+      isLoading = false;
+      return cancel();
+    }
+
+    if (errorMessage) errorMessage = '';
+    
 
 		return async ({ result, update }) => {
       if (result.status === 200) {
@@ -90,27 +104,20 @@
 		placeholder="Ask about file..."
     name="prompt"
 	></textarea>
+  {#if errorMessage.length > 0}
+    <p>{errorMessage}</p>
+  {/if}
 
 	<div
-		class={clsx('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
+		class={cn('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
 	>
 		<input bind:this={inputFile} onchange={handleFileChange} type="file" name="file" hidden />
-		<button class="w-fit relative z-10" onclick={() => inputFile?.click()} disabled={isLoading}>
-			<span
-				class={clsx(
-					'relative h-10 border rounded-full flex justify-center items-center min-w-10 w-fit hover:bg-slate-50 transition-colors duration-300 disabled:bg-slate-100'
-				)}
-			>
-				<Paperclip size={20} />
-			</span>
-		</button>
+    <Button variant="outline" size="icon" class="rounded-full" onclick={() => inputFile?.click()} disabled={isLoading}>
+      <Paperclip size={20} />
+    </Button>
 
-		<button bind:this={sendMessageButton} disabled={isLoading}>
-			<div
-				class={clsx("size-10 border bg-primary text-primary-foreground rounded-full flex justify-center items-center", {"bg-gray-300 text-gray-500": isLoading})}
-			>
-				<ArrowUp size={20} />
-			</div>
+		<button class={cn(buttonVariants({ variant: "default", className: "rounded-full", size: "icon" }))} bind:this={sendMessageButton} disabled={isLoading}>
+      <ArrowUp size={20} />
 		</button>
 	</div>
 </form>

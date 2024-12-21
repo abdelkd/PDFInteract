@@ -3,6 +3,8 @@
 	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
 	import type { LayoutServerData } from './$types';
   import { cn } from '$lib/utils';
+  import { Textarea } from '$lib/components/ui/textarea';
+  import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		data: LayoutServerData;
@@ -52,13 +54,12 @@
 
 			(async() => {
 				for (let i=0; i < 4; i++) {
-	
+
 					const result = await fetchFirstThread(chatID)
 					if (result) return;
 				}
 
-				console.log('failed')
-				chatHistory.updateLastThread('Failed to generate content, try again later.')
+				chatHistory.updateLastThread('Failed to generate content.')
 			})()
 		}
 	});
@@ -100,7 +101,6 @@
 					chatHistory.updateLastThread(textBuf);
 				}
 
-				console.log(textBuf);
 			});
 		} catch (err) {
 			console.log(err);
@@ -132,8 +132,8 @@
 
 			<div class="mt-5 w-full px-2">
 				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
-					<textarea bind:value={newQuestion} class="resize-none w-full border rounded-md"></textarea>
-					<button disabled={newQuestion === ''} class="bg-black rounded-lg text-white px-4 py-3">Send</button>
+					<Textarea bind:value={newQuestion} class="resize-none w-full border rounded-md" />
+					<Button type="submit" disabled={newQuestion === ''} class="py-8 rounded-lg ">Send</Button>
 				</form>
 			</div>
 		</div>
