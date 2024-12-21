@@ -1,11 +1,11 @@
 <script lang="ts">
-	import clsx from 'clsx';
-  import { enhance } from '$app/forms';
-
 	import Paperclip from 'lucide-svelte/icons/paperclip';
 	import ArrowUp from 'lucide-svelte/icons/arrow-up';
 	import X from 'lucide-svelte/icons/x';
+
+  import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { cn } from '$lib/utils';
 
 	let textarea: HTMLTextAreaElement;
 	let inputFile: HTMLInputElement;
@@ -92,12 +92,12 @@
 	></textarea>
 
 	<div
-		class={clsx('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
+		class={cn('w-full flex justify-between', { 'grid grid-cols-[1fr_40px]': selectedFileName })}
 	>
 		<input bind:this={inputFile} onchange={handleFileChange} type="file" name="file" hidden />
 		<button class="w-fit relative z-10" onclick={() => inputFile?.click()} disabled={isLoading}>
 			<span
-				class={clsx(
+				class={cn(
 					'relative h-10 border rounded-full flex justify-center items-center min-w-10 w-fit hover:bg-slate-50 transition-colors duration-300 disabled:bg-slate-100'
 				)}
 			>
@@ -105,9 +105,10 @@
 			</span>
 		</button>
 
+    <Button
 		<button bind:this={sendMessageButton} disabled={isLoading}>
 			<div
-				class={clsx("size-10 border bg-primary text-primary-foreground rounded-full flex justify-center items-center", {"bg-gray-300 text-gray-500": isLoading})}
+				class={cn("size-10 border bg-primary text-primary-foreground rounded-full flex justify-center items-center", {"bg-gray-300 text-gray-500": isLoading})}
 			>
 				<ArrowUp size={20} />
 			</div>
