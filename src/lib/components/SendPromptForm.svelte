@@ -105,7 +105,7 @@
     name="prompt"
 	></textarea>
   {#if errorMessage.length > 0}
-    <p>{errorMessage}</p>
+    <p class="text-sm text-[#FF0000]">{errorMessage}</p>
   {/if}
 
 	<div
