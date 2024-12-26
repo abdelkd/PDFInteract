@@ -28,15 +28,5 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 
 	return resolve(event);
 };
-const regex = /^\/chat\/?$/
 
-export const handle: Handle = async ({ event, resolve }) => {
-  if (regex.test(event.url.pathname)) {
-    return new Response(null, {
-      status: 302,
-      headers: { Location: "/" },
-    })
-  }
-
-  return handleAuth({ event, resolve })
-};
+export const handle: Handle = handleAuth
