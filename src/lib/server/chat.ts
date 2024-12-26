@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import { env } from "$env/dynamic/private";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { saveChatAnswer, type getChatByID } from "./db/chat";
+import { getChatByID } from "./db/chat";
 import type { Thread } from "$lib/types";
 
 const mimeType = "application/pdf"
@@ -20,8 +20,6 @@ THE RULES THAT YOUR MUST FOLLOW:
 - YOUR REPLY MUST NOT BE WRAPPED IN JSON OR ANYTHING.
 - IT'S OKAY TO REPLY WITH LONG AND DESCRIPTIVE TEXT.
 `
-
-
 export const askPDF = async (pdfUri: string, prompt: string) => {
 
   const result = await model.generateContent([
@@ -79,13 +77,11 @@ export const getStreamedAIResponse = async (args: GetAIResponseArgs) => {
 
 export const askNewQuestion = (mixedPrompts: Thread[], question: string, fileUri: string) => {
   const mix = mixedPrompts.map((prompt) => {
-    return `
-    USER:
-    ${prompt.user}
+    if (prompt.sender === "user") {
+      return `USER: ${prompt.text}`
+    }
 
-    MODEL:
-    ${prompt.ai}
-    `
+    return `AI: ${prompt.text}`
   })
 
   const initialPrompt = `
@@ -112,13 +108,4 @@ export function generateChatID() {
   const timestamp = Date.now()
   const token = encodeBase32LowerCaseNoPadding(tokenBytes) + timestamp.toString()
   return token
-}
-
-export function chatHistoryFromChat(chat: Awaited<ReturnType<typeof getChatByID>>[number]): Thread[] {
-  const chatHistory = chat.prompt.map((prompt, idx) => ({
-    user: prompt,
-    ai: chat.answer[idx] ?? ''
-  }))
-
-  return chatHistory
 }

@@ -1,7 +1,6 @@
 import { getChatByID } from "$lib/server/db/chat";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
-import { chatHistoryFromChat } from "$lib/server/chat";
 
 export const load: LayoutServerLoad = async ({ params }) => {
   const chats = await getChatByID(params.chatID)
@@ -10,7 +9,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
   const chat = chats[0];
   if (Date.now() >= (new Date(chat.expiresOn)).getTime()) return error(404);
 
-  const chatHistory = chatHistoryFromChat(chat);
+  const chatHistory = chat.chat;
 
   return {
     chatHistory,

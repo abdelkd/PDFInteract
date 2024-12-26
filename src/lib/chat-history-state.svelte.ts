@@ -17,11 +17,11 @@ class ChatHistory {
     this.chatHistory.pop()
   }
 
-  updateLastThread(aiText: string) {
-    const lastThread = this.chatHistory.at(-1);
-    if (lastThread) {
-      lastThread.ai = aiText
-    }
+  updateLastThread(chunk: string) {
+    const lastThread = this.chatHistory.at(-1)
+    if (!lastThread) return;
+
+    lastThread.text += chunk;
   }
 }
 

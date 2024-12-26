@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm"
 import { db } from "."
 import { chatTable } from "./schema"
+import type { Thread } from "../../types"
 
 
 export const getChatByID = async (id: string) => {
@@ -9,29 +10,37 @@ export const getChatByID = async (id: string) => {
     .where(eq(chatTable.id, id))
 }
 
-export const saveChatAnswer = async (chatId: string, question: string, answer: string) => {
+type AppendChatEntryArgs = {
+  sender: Thread['sender'],
+  chatID: string,
+  text: string,
+}
+export const appendChatEntry = async ({ sender, chatID, text }: AppendChatEntryArgs) => {
   try {
-    const chat = await db.select()
-      .from(chatTable)
-      .where(
-        eq(chatTable.id, chatId)
-      )
+    const chats = await getChatByID(chatID)
 
-    const oldAnswers = chat[0].answer
-    const newAnswers = [...oldAnswers.slice(0), answer]
+    if (chats.length === 0) return;
 
-    const oldQuestions = chat[0].prompt
-    const newQuestions = [...oldQuestions.slice(0)]
-    if (question !== '') {
-      newQuestions.push(question)
-    }
+    chats[0].chat.push({ sender, text })
 
-    await db.update(chatTable).set({
-      answer: newAnswers,
-      prompt: newQuestions,
-    })
+    await db.update(chatTable).set({ chat: chats[0].chat }).where(eq(chatTable.id, chatID))
 
   } catch (err) {
-    console.log(err)
+    console.error(err)
+  }
+}
+
+export const saveChatAnswer = async (chatId: string, text: string) => {
+  try {
+    const chats = await getChatByID(chatId)
+
+    if (chats.length === 0) return;
+
+    chats[0].chat.push({ sender: 'ai', text })
+
+    await db.update(chatTable).set({ chat: chats[0].chat }).where(eq(chatTable.id, chatId))
+
+  } catch (err) {
+    console.error(err)
   }
 }

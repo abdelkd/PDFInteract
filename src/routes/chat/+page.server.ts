@@ -25,8 +25,7 @@ export const actions = {
 			const chatID = generateChatID();
 			await db.insert(chatTable).values({
 				id: chatID,
-				prompt: [prompt],
-				answer: [],
+				chat: [{ sender: 'user', text: prompt }],
 				fileUri: fileResult.file.uri,
 				expiresOn: new Date(Date.now() + 1000 * 60 * 60 * 24)
 			});

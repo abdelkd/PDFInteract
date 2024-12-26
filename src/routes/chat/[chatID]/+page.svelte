@@ -1,141 +1,123 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
-	import type { LayoutServerData } from './$types';
-  import { cn } from '$lib/utils';
-  import { Textarea } from '$lib/components/ui/textarea';
-  import { Button } from '$lib/components/ui/button';
+  import { page } from '$app/stores';
 
-	interface Props {
-		data: LayoutServerData;
+	import { Input } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+
+	import { cn } from '$lib/utils';
+	import { getChatHistoryState } from '$lib/chat-history-state.svelte';
+
+	let chatStore = $state(getChatHistoryState());
+	let message = $state('');
+	let isThinking = $state(false);
+
+  $effect(() => {
+    chatStore.chatHistory
+    const lastMessage = chatStore.chatHistory.at(-1)
+    if (!!lastMessage && lastMessage?.sender === 'user') {
+      isThinking = true;
+
+      askQuestion(lastMessage?.text!).then(() => {
+        isThinking = false
+      });
+    }
+
+  })
+
+  async function askQuestion(message: string) {
+    const chatID = $page.params.chatID
+
+    const body = JSON.stringify({
+      chatId: chatID,
+      prompt: message,
+    })
+
+    const result = await fetch(`/chat/${chatID}/`, { method: 'POST', body })
+
+    if (!result.ok) {
+      chatStore.popThread();
+      return console.error('error')
+    }
+
+    const reader = result.body?.getReader()!
+    const decoder = new TextDecoder();
+
+    let chunk: any;
+    let textBuf = '';
+    while ((chunk = await reader.read()) && !chunk.done) {
+      textBuf += decoder.decode(chunk.value)
+
+      if (chatStore.chatHistory.at(-1).sender !== 'ai') {
+        chatStore.addThread({ sender: 'ai', text: textBuf })
+        continue;
+      }
+
+      chatStore.chatHistory.at(-1).text = textBuf
+    }
+  }
+
+	async function sendMessage() {
+		if (!message.trim()) return;
+
+    isThinking = true;
+    chatStore.addThread({ sender: 'user', text: message })
+
+    await askQuestion(message)
+
+    message = '';
+		isThinking = false;
 	}
 
-	const { data }: Props = $props();
-
-	let { chatHistory: chatsFromServer } = data;
-
-	let chatHistory = $state<ReturnType<typeof getChatHistoryState>>(getChatHistoryState());
-
-	let newQuestion = $state('');
-	let shadowNewQuestion = $state('');
-	let chats = chatsFromServer;
-	let lastChat = $state(chatsFromServer.at(-1)!);
-
-	const decoder = new TextDecoder();
-
-	const fetchFirstThread = async (chatID: string) => {
-		const endpoint = `/chat/${chatID}?prompt-idx=${0}`;
-
-		const response = await fetch(endpoint);
-		if (!response.ok) {
-		  console.error('Something went wrong');
-			return false;
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			sendMessage();
 		}
-
-		const reader = response.body?.getReader();
-		if (!reader) return;
-
-		let textBuf = '';
-
-		while (true) {
-			const { done, value } = await reader.read();
-			if (done) return true;
-
-			if (lastChat.ai) lastChat.ai = '';
-
-			textBuf += decoder.decode(value);
-			chatHistory.updateLastThread(textBuf);
-		}
-	};
-
-	$effect(() => {
-		if (lastChat?.ai?.length === 0) {
-			const chatID = $page.params.chatID;
-
-			(async() => {
-				for (let i=0; i < 4; i++) {
-
-					const result = await fetchFirstThread(chatID)
-					if (result) return;
-				}
-
-				chatHistory.updateLastThread('Failed to generate content.')
-			})()
-		}
-	});
-
-	const handleNewQuestion = async (e: SubmitEvent) => {
-		e.preventDefault();
-		const endpoint = `/chat/${$page.params.chatID}`;
-		let textBuf = '';
-
-		shadowNewQuestion = newQuestion;
-		newQuestion = '';
-		chatHistory.addThread({
-			user: shadowNewQuestion,
-			ai: ''
-		});
-
-		try {
-			await fetch(endpoint, {
-				method: 'POST',
-				body: JSON.stringify({
-					prompt: shadowNewQuestion
-				})
-			}).then(async (response) => {
-				if (!response.ok) {
-					throw new Error('');
-				}
-
-				const reader = response.body?.getReader();
-				if (!reader) return;
-
-				while (true) {
-					const { done, value } = await reader.read();
-
-					if (done) {
-						break;
-					}
-
-					textBuf += decoder.decode(value);
-					chatHistory.updateLastThread(textBuf);
-				}
-
-			});
-		} catch (err) {
-			console.log(err);
-			newQuestion = shadowNewQuestion;
-			chatHistory.popThread();
-		}
-
-		shadowNewQuestion = '';
-	};
+	}
 </script>
 
-{#if !chats}
-	<div class="w-fit max-w-md mx-auto pt-36">
-		<h1 class="text-4xl">Nothing to show here</h1>
-	</div>
-{:else}
-	<div class="w-full max-w-lg mx-auto py-6">
-		<div class="flex flex-col gap-3">
-      <div class="space-y-4">
-        {#each chatHistory.chatHistory as chatThread}
-          <div class={cn("p-4 rounded-lg bg-blue-200 ml-auto w-fit")}>
-            <p>{chatThread?.user}</p>
-					</div>
-					<div class={cn("p-4 rounded-lg bg-gray-200 ml-auto")}>
-            <p>{chatThread.ai.length > 0 ? chatThread.ai : 'Analyzing file...'}</p>
-					</div>
-        {/each}
-      </div>
-
-			<div class="mt-5 w-full px-2">
-				<form onsubmit={handleNewQuestion} class="flex items-center justify-center gap-1 w-full">
-					<Textarea bind:value={newQuestion} class="resize-none w-full border rounded-md" />
-					<Button type="submit" disabled={newQuestion === ''} class="py-8 rounded-lg ">Send</Button>
-				</form>
+<div class="flex flex-col w-full h-screen bg-zinc-50 dark:bg-zinc-900">
+  <ScrollArea class="w-full h-full">
+	<div class="flex-grow overflow-y-auto p-4 space-y-4 max-w-2xl mx-auto">
+		{#each chatStore.chatHistory as msg}
+        <div class:justify-end={msg.sender === 'user'} class="flex">
+          <div
+            class={cn(
+              'p-3 rounded-lg max-w-[80%] break-words',
+              msg.sender === 'user'
+                ? 'bg-zinc-500 text-white'
+                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50'
+            )}
+          >
+            {msg.text}
+          </div>
+        </div>
+		{/each}
+		{#if isThinking}
+			<div class="flex justify-start">
+				<div class="p-3 rounded-lg max-w-[80%] bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 animate-pulse">
+					Thinking...
+				</div>
 			</div>
+		{/if}
+
+	</div>
+  </ScrollArea>
+
+	<div class="p-4 border-t dark:border-zinc-700 w-full max-w-2xl mx-auto">
+		<div class="flex space-x-2">
+			<Input
+				type="text"
+				placeholder="Type your message..."
+				bind:value={message}
+				onkeydown={handleKeyDown}
+				disabled={isThinking}
+				class="flex-grow"
+			/>
+			<Button on:click={sendMessage} disabled={isThinking}>
+				Send
+			</Button>
 		</div>
 	</div>
-{/if}
+</div>
+
