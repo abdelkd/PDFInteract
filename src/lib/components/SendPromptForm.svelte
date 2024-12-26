@@ -51,7 +51,6 @@
 				/* @ts-expect-error */
 				const data = result.data;
 				const chatID = data.chatID;
-        console.log({ chatID });
 				if (!chatID) return;
 
 				return goto(`/chat/${chatID}`);

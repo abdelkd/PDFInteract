@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { askNewQuestion, getStreamedAIResponse } from '$lib/server/chat';
-import { getChatByID, saveChatAnswer } from '$lib/server/db/chat';
+import { appendChatEntry, getChatByID, saveChatAnswer } from '$lib/server/db/chat';
 
 export const GET: RequestHandler = async ({ request, params }) => {
 	const queryParams = new URL(request.url).searchParams;
@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
 	if (chats.length < 1) return json({ error: true, message: 'not found' });
 
 	// type safety
-	const prompt = chats[0].prompt.at(promptIdx)!;
+	const prompt = chats[0].chat[0].text;
 
 	try {
 		const stream = new ReadableStream({
@@ -33,8 +33,9 @@ export const GET: RequestHandler = async ({ request, params }) => {
 						},
 						onEnd: async (response) => {
 							if (response === '') return;
+              console.log(response)
 
-							await saveChatAnswer(chatID, '', response)
+							await appendChatEntry({ chatID, sender: 'ai', text: response })
               controller.close()
 						}
 					});
@@ -67,22 +68,23 @@ export const POST: RequestHandler = async ({ request, params }) => {
 	const chat = await getChatByID(chatID);
 	if (chat.length < 1) return json({ error: true, message: 'Chat is not found' }, { status: 404 });
 
-	const chatHistory = chat[0].prompt.map((promptEntry, idx) => ({
-		user: promptEntry,
-		ai: chat[0].answer[idx] ?? 'No Answer Provided.'
-	}));
+  const lastChat = chat[0]?.chat.at(-1)
+
+  if (lastChat?.sender === 'ai') {
+    await appendChatEntry({ chatID, sender: 'user', text: prompt, })
+  }
 
 	try {
 		const stream = new ReadableStream({
 			start: async (controller) => {
-				const answerStream = await askNewQuestion(chatHistory, prompt, chat[0].fileUri);
+				const answerStream = await askNewQuestion(chat[0].chat, prompt, chat[0].fileUri);
         let textBuf = '';
 
 				while (true) {
 					const { done, value } = await answerStream.stream.next();
 
 					if (done) {
-						await saveChatAnswer(chatID, prompt, textBuf);
+            await appendChatEntry({ chatID, sender: 'ai', text: textBuf })
 						controller.close();
 						break;
 					}
