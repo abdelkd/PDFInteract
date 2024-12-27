@@ -114,7 +114,7 @@
 				disabled={isThinking}
 				class="flex-grow"
 			/>
-			<Button on:click={sendMessage} disabled={isThinking}>
+			<Button onclick={sendMessage} disabled={isThinking}>
 				Send
 			</Button>
 		</div>
